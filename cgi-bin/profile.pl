@@ -31,6 +31,9 @@ print <<EOD;
     <td>Favorite Pearl Jam album:</td><td>$profile{pearljam}</td>
   </tr>
   <tr>
+    <td>College:</td><td>$profile{college}</td>
+  </tr>
+  <tr>
     <td>Sex:</td><td>$profile{sex}</td>
   </tr>
 </table>
