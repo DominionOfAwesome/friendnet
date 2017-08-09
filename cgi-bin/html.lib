@@ -1,0 +1,18 @@
+sub html_head {
+    print <<EOD
+<html>
+<head>
+<title>FriendNet! - A place for friends</title>
+</head>
+<body bgcolor=lightblue color=black>
+EOD
+}
+
+sub html_foot {
+    print <<EOD
+</body>
+</html>
+EOD
+}
+
+1;

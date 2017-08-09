@@ -1,0 +1,9 @@
+if ($ENV{'HTTP_COOKIE'}) {
+    @cookies = split(/;/, $ENV{'HTTP_COOKIE'});
+    foreach $cookie (@cookies) {
+        ($name, $value) = split(/=/, $cookie);
+        $cookies{$name} = $value;
+    }
+}
+
+1;
