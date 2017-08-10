@@ -1,18 +1,48 @@
 sub html_head {
+    $background = shift;
+    $width = shift || 640;
     print <<EOD
 <html>
 <head>
 <title>FriendNet! - A place for friends</title>
 </head>
-<body bgcolor=lightblue color=black>
+<body bgcolor=lightblue color=black background=$background>
+<table width=$width><tr><td>
 EOD
 }
 
 sub html_foot {
     print <<EOD
+</td></tr></table>
 </body>
 </html>
 EOD
+}
+
+sub h1 {
+    "<h1>@_</h1>";
+}
+
+sub h2 {
+    "<h2>@_</h2>";
+}
+
+sub img {
+    $src = shift;
+    "<img src=$src" . attr_expando(@_) . ">";
+}
+
+sub friendnet {
+    "<font color=red>Friend</font><font color=blue>Net!</font>";
+}
+
+sub attr_expando {
+    %attr = @_;
+    $s = '';
+    for $k (keys %attr) {
+        $s .= " $k=$attr{$k}";
+    }
+    return $s;
 }
 
 1;

@@ -8,33 +8,27 @@ $logged_in = $cookies{loggedin} eq $formdata{u};
 
 print "Content-type: text/html\r\n\r\n";
 
-&html_head;
-
 %profile = profile_load($formdata{u});
 
-print <<EOD;
-<h1>FriendNet!</h1>
-<h2>$formdata{u}</h2>
-EOD
+&html_head($profile{dogs} ? "/img/dog.gif" : '');
 
-if ($profile{dogs}) {
-    print <<EOD
-<style>
-body { background-image: url(/img/dog.gif) }
-</style>
-EOD
+print h1(&friendnet);
+if ($profile{photo}) {
+    print img("/images/$profile{photo}", align => right, width => 200);
 }
+print h2($formdata{u});
+
 
 print <<EOD;
-<table>
+<table bgcolor=purple border=2 cellpadding=4>
   <tr>
-    <td>Favorite Pearl Jam album:</td><td>$profile{pearljam}</td>
+    <td><font color=white><b>Favorite Pearl Jam album:</b></font></td><td><font color=white>$profile{pearljam}</font></td>
   </tr>
   <tr>
-    <td>College:</td><td>$profile{college}</td>
+    <td><font color=white><b>College:</b></font></td><td><font color=white>$profile{college}</font></td>
   </tr>
   <tr>
-    <td>Sex:</td><td>$profile{sex}</td>
+    <td><font color=white>Sex:</font></td><td><font color=white>$profile{sex}</font></td>
   </tr>
 </table>
 EOD
