@@ -32,6 +32,22 @@ sub img {
     "<img src=$src" . attr_expando(@_) . ">";
 }
 
+sub select_option {
+    $name = shift;
+    $value = shift;
+    $s = "<select name=$name>";
+    for $i (@_) {
+        if ($i eq $value) {
+            $s .= "<option selected>";
+        } else {
+            $s .= "<option>";
+        }
+        $s .= "$i</option>";
+    }
+    $s .= "</select>";
+    return $s;
+}
+
 sub friendnet {
     "<font color=red>Friend</font><font color=blue>Net!</font>";
 }
