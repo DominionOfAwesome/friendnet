@@ -15,8 +15,14 @@ if (%formdata > 0) {
     } elsif ($formdata{password1} ne $formdata{password2}) {
         print "Your passwords don't match";
     } else {
-        %profile = %formdata{username,dogs,pearljam,sex,college,photo};
+        %profile = %formdata{username,dogs,pearljam,sex,college};
         $profile{password} = $formdata{password1};
+        if ($formdata{photo}) {
+            $profile{photo} = $filenames{photo};
+            open PHOTO, ">../www/images/$filenames{photo}";
+            print PHOTO $formdata{photo};
+            close PHOTO;
+        }
         &profile_save($formdata{username}, %profile);
         print <<EOD
 <h2>Success!</h2>
@@ -28,7 +34,7 @@ EOD
     print <<EOD;
 <h2>Join FriendNet</h2>
 
-<form>
+<form method=POST enctype=multipart/form-data>
 <p>Username: <input name=username type=text size=8 maxlength=8>
 <p>Password: <input name=password1 type=password size=8 maxlength=8>
 <p>Password again: <input name=password2 type=password size=8 maxlength=8>
@@ -63,7 +69,7 @@ EOD
   <option>University of Georgia</option>
   <option>University of Mississippi</option>
 </select>
-<p>A photo of you: <input name=photo type=file>
+<p>A photo of you (100KB max): <input name=photo type=file>
 <p>Ready? <input type="image" src="/img/clickhere.gif"> to join!
 </form>
 EOD
