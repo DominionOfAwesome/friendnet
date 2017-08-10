@@ -4,25 +4,80 @@
 # Elizabeth Castro
 if ($ENV{'REQUEST_METHOD'} eq 'GET') {
     @pairs = split(/&/, $ENV{'QUERY_STRING'});
+    &parse_querystring;
 } elsif ($ENV{'REQUEST_METHOD'} eq 'POST') {
-    read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
-    @pairs = split(/&/, $buffer);
+    # Garth says the reason the server keeps crashing is because the form
+    # uploads are using too much memory.  I told him these old Solaris boxes
+    # aren't cutting it and we should switch to Linux.  This'll keep things
+    # running. -cb
+    if ($ENV{'CONTENT_LENGTH'} > 102400) {
+        print "Status: 413 Request Entity Too Large\r\n";
+        print "Content-Type: text/plain\r\n\r\n";
+        print "Upload too large";
+        exit 0;
+    }
+    if ($ENV{'CONTENT_TYPE'} =~ /^multipart\/form-data/) {
+        $boundary = (split(/;/, $ENV{'CONTENT_TYPE'}))[1];
+        $boundary = (split(/=/, $boundary))[1];
+        read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
+        @parts = split(/(?:\r\n)?--$boundary(?:\r\n)?/, $buffer);
+        shift @parts;
+        pop @parts;
+        &parse_multipart;
+    } else {
+        read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
+        @pairs = split(/&/, $buffer);
+        &parse_querystring;
+    }
 }
 
-foreach $pair (@pairs) {
-    ($key, $value) = split(/=/, $pair);
-    $key =~ tr/+/ /;
-    $key =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-    $value =~ tr/+/ /;
-    $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+sub parse_querystring {
+    foreach $pair (@pairs) {
+        ($key, $value) = split(/=/, $pair);
+        $key =~ tr/+/ /;
+        $key =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+        $value =~ tr/+/ /;
+        $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
 
-    # I don't even understand this -cb
-    $value =~ s/<!--(.|\n)*-->//g;
+        # I don't even understand this -cb
+        $value =~ s/<!--(.|\n)*-->//g;
 
-    if ($formdata{$key}) {
-        $formdata{$key} .= ", $value";
-    } else {
-        $formdata{$key} = $value;
+        if ($formdata{$key}) {
+            $formdata{$key} .= ", $value";
+        } else {
+            $formdata{$key} = $value;
+        }
+    }
+}
+
+sub parse_multipart {
+    for $part (@parts) {
+        %part_headers = ();
+        $name = '';
+        ($head, $content) = split(/\r\n\r\n/, $part);
+        @fields = split(/\r\n/, $head);
+        for $field (@fields) {
+            ($key, $value) = split(/:\s*/, $field);
+            if ($key eq 'Content-Disposition') {
+                ($type, @extra) = split(/;\s*/, $value);
+                if ($type ne 'form-data') {
+                    print "400 Bad Request\r\n\r\n";
+                    print STDERR "Invalid form data type: $type\n";
+                    exit 1;
+                }
+                for $e (@extra) {
+                    ($k, $v) = split(/=/, $e);
+                    $v =~ s/^"//;
+                    $v =~ s/"$//;
+                    if ($k eq 'name') {
+                        $name = $v;
+                    } elsif ($k eq 'filename') {
+                        $filenames{$name} = $v;
+                    }
+                }
+            }
+        }
+        $formdata{$name} = $content;
     }
 }
 
