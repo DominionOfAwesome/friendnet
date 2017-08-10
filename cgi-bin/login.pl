@@ -4,7 +4,7 @@ require "form.lib";
 require "data.lib";
 
 if (%formdata > 0 && $formdata{success} eq 'true') {
-    print "Set-Cookie: loggedin=$formdata{username}\r\n";
+    print "Set-Cookie: loggedin=$formdata{u}\r\n";
     print "Location: /cgi-bin/profile.pl?u=$formdata{u}\r\n\r\n";
 } elsif (%formdata > 0) {
     %profile = &profile_load($formdata{username});
