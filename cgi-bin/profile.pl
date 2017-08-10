@@ -33,4 +33,8 @@ print <<EOD;
 </table>
 EOD
 
+if ($logged_in) {
+    print "<p><a href=/cgi-bin/edit_profile.pl?u=$formdata{u}>Edit profile</a>\n";
+}
+
 &html_foot;
