@@ -27,6 +27,10 @@ sub h2 {
     "<h2>@_</h2>";
 }
 
+sub h3 {
+    "<h3>@_</h3>";
+}
+
 sub img {
     $src = shift;
     "<img src=$src" . attr_expando(@_) . ">";

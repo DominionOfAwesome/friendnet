@@ -1,0 +1,46 @@
+require "data.lib";
+
+sub guestbook_add {
+    ($to, $from, $post) = @_;
+
+    $guestbook_dir = "$datadir/guestbook/$to";
+    print STDERR "$guestbook_dir\n";
+    mkdir $guestbook_dir unless -d $guestbook_dir;
+
+    # move the old ones out of the way
+    if ("$guestbook_dir/5") {
+        open ARCHIVE, ">$guestbook_dir/archive.new";
+        open F, "$guestbook_dir/5";
+        print ARCHIVE <F>;
+        close F;
+        if (-f "$guestbook_dir/archive") {
+            open F, "$guestbook_dir/archive";
+            print ARCHIVE <F>;
+            close F;
+        }
+        rename "$guestbook_dir/archive.new", "$guestbook_dir/archive";
+    }
+    for $p (4,3,2,1) {
+        if (-f "$guestbook_dir/$p") {
+            rename "$guestbook_dir/$p", "$guestbook_dir/" . ($p + 1);
+        }
+    }
+    open POST, ">$guestbook_dir/1";
+    print POST "<div><b>Posted by $from at " . (scalar localtime) . "</b>\n";
+    print POST "<p>", $post;
+    print POST "</div>\n";
+    close POST;
+}
+
+sub guestbook_feed {
+    ($user) = @_;
+
+    $guestbook_dir = "$datadir/guestbook/$user";
+    for $post (1..5) {
+        open POST, "$guestbook_dir/$post";
+        print <POST>;
+        close POST;
+    }
+}
+
+1;

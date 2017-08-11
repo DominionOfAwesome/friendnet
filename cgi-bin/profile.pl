@@ -3,6 +3,7 @@ require "html.lib";
 require "form.lib";
 require "data.lib";
 require "cookies.lib";
+require "guestbook.lib";
 
 $logged_in = $cookies{loggedin} eq $formdata{u};
 
@@ -19,6 +20,12 @@ if ($profile{photo}) {
 print h2($formdata{u});
 
 
+print &h3("About $formdata{u}");
+
+if ($logged_in) {
+    print "<a href=/cgi-bin/edit_profile.pl?u=$formdata{u}>Edit profile</a>\n";
+}
+
 print <<EOD;
 <table bgcolor=purple border=2 cellpadding=4>
   <tr>
@@ -33,8 +40,14 @@ print <<EOD;
 </table>
 EOD
 
-if ($logged_in) {
-    print "<p><a href=/cgi-bin/edit_profile.pl?u=$formdata{u}>Edit profile</a>\n";
+print "<a name=guestbook><h3>Guestbook</h3>\n";
+print "<p><a href=/cgi-bin/guestbook.pl?u=$formdata{u}>Sign my guestbook!</a>\n";
+print "<p><table bgcolor=pink border=2 cellpadding=4 width=100%><tr><td>\n";
+if (-e "$datadir/guestbook/$formdata{u}") {
+    &guestbook_feed($formdata{u});
+} else {
+    print "No one has posted yet. Be the first!\n";
 }
+print "</td></tr></table>\n";
 
 &html_foot;
